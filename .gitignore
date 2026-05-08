@@ -1,0 +1,15 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# ML models
+*.pt
+*.onnx
+
+# Environment
+.env
+
+# OS
+.DS_Store
