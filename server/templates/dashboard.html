@@ -15,6 +15,16 @@
 </head>
 <body>
     <h1>🐱 Cat Feeder Dashboard</h1>
+    <img src="/video_feed" width="640" height="480" />
+    <button onclick="manualFeed()">🐱 Manual Feed</button>
+
+    <script>
+    function manualFeed() {
+        fetch('/manual_feed', { method: 'POST' })
+            .then(r => r.json())
+            .then(() => alert('Feed triggered!'));
+    }
+    </script>
     <p class="status">Last updated: <span id="lastUpdated">--</span></p>
     <table>
         <thead>

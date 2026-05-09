@@ -13,3 +13,7 @@ __pycache__/
 
 # OS
 .DS_Store
+
+cat_dataset_old/
+
+cat-dataset/
