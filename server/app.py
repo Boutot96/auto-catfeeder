@@ -6,6 +6,10 @@ import numpy as np
 from ultralytics import YOLO
 import time
 
+import json
+import os
+
+
 model = YOLO("best_v2.pt")
 latest_frame = None
 pending_command = None
@@ -15,6 +19,10 @@ dinner_fed = False
 app = Flask(__name__)
 
 events = []
+LOG_FILE = 'feed_events.json'
+if os.path.exists(LOG_FILE):
+    with open(LOG_FILE) as f:
+        events = json.load(f)
 
 MAX_FEEDS_PER_DAY = 3
 MIN_TIME_BETWEEN_FEEDS = timedelta(hours=5)
@@ -38,6 +46,7 @@ def scheduled_feed():
         _do_feed('scheduled breakfast')
         lunch_fed = False  # reset for the day
         dinner_fed = False
+        feed_log.clear()
 
 def _do_feed(details):
     global pending_command
@@ -46,8 +55,9 @@ def _do_feed(details):
         'type': 'dispense',
         'cat': 'lily',
         'details': details,
-        'timestamp': datetime.now().strftime('%H:%M:%S')
+        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     })
+    save_events()
     
 # 6am every day
 scheduler.add_job(scheduled_feed, 'cron', hour=6, minute=0)
@@ -73,9 +83,14 @@ def can_feed():
 
 def in_feeding_window():
     hour = datetime.now().hour
-    return (11 <= hour < 13) or (16 <= hour < 19)
+    return (10 <= hour < 13) or (16 <= hour < 19)
 
 
+def save_events():
+    with open(LOG_FILE, 'w') as f:
+        json.dump(events, f, indent=2)
+        
+        
 @app.route('/')
 def dashboard():
     return render_template('dashboard.html', events=events)
@@ -84,6 +99,13 @@ def dashboard():
 def manual_feed():
     global pending_command
     pending_command = {'dispense': True, 'cat': 'manual'}
+    events.append({
+        'type': 'dispense',
+        'cat': 'lily',
+        'details': 'manual feed',
+        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    })
+    save_events()
     return jsonify({'status': 'ok'})
 
 @app.route('/frame', methods=['POST'])
@@ -115,8 +137,9 @@ def receive_frame():
                     'type': 'detection',
                     'cat': 'lily',
                     'details': f"confidence: {conf:.2f}",
-                    'timestamp': datetime.now().strftime('%H:%M:%S')
+                    'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 })
+                save_events()
     return jsonify({'status': 'ok'})
 
 
