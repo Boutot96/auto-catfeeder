@@ -15,7 +15,7 @@ void loop() {
     if (Serial.available() > 0) {
         char cmd = Serial.read();
         if (cmd == 'D') {
-            stepper.step(STEPS_PER_REV); // Dispense food (90 degrees)
+            stepper.step(13900); // Dispense food (90 degrees)
         }
         if (cmd == 'S') {
             feeding = true; // Reset position
