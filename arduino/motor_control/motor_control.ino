@@ -3,6 +3,8 @@
 
 const int STEPS_PER_REV = 2048;
 Stepper stepper(STEPS_PER_REV, 8, 10, 9, 11);
+long totalSteps = 0;
+bool feeding = false;
 
 void setup() {
     stepper.setSpeed(10);
@@ -15,5 +17,19 @@ void loop() {
         if (cmd == 'D') {
             stepper.step(STEPS_PER_REV); // Dispense food (90 degrees)
         }
+        if (cmd == 'S') {
+            feeding = true; // Reset position
+            totalSteps = 0;
+        }
+        if (cmd == 'R') {
+            feeding = false; 
+            Serial.print("Total steps: ");
+            Serial.println(totalSteps);
+
+        }
+    }
+    if (feeding) {
+        stepper.step(10);
+        totalSteps += 10;
     }
 }
